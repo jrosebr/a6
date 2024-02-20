@@ -49,7 +49,7 @@
 ;(times-cps-shortcut '(1 2 3 4 5) (λ (v) v))
 ;(times-cps-shortcut '(1 2 3 0 3) (λ (v) v))
 
-(require racket/trace)
+
 ;Problem 5
 (define remv-first-9*-cps
   (lambda (ls k)
@@ -64,11 +64,9 @@
          [else (cons (k (cdr ls)) (remv-first-9*-cps (car ls) (λ (v)
                                                    (k v))))])]
       
-      [(eqv? (car ls) '9) (cdr ls)]
+      [(eqv? (car ls) '9) (k (cdr ls))]
       [else (cons (k (car ls)) (remv-first-9*-cps (cdr ls) (λ (v)
                                                              (k v))))])))
-
-(trace remv-first-9*-cps)
 
 (remv-first-9*-cps '((1 2 (3) 9)) (λ (v) v))
 (remv-first-9*-cps '(9 (9 (9 (9)))) (λ (v) v))
