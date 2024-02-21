@@ -10,8 +10,8 @@
   (λ (n k)
     (cond
       [(null? n) (k 0)]
-      [else (+ (k (car n)) (binary-to-decimal-cps (cdr n) (λ (v)
-                                                            (k (* 2 v)))))]
+      [else (binary-to-decimal-cps (cdr n) (λ (v)
+                                             (k (+ (* 2 v) (car n)))))]
       )))
 
 ;(binary-to-decimal-cps '() (empty-k))
@@ -58,31 +58,40 @@
 ;(times-cps-shortcut '(1 2 3 0 3) (empty-k))
 
 
-;Problem 5 (???) X
+;Problem 5
 (define remv-first-9*-cps
   (lambda (ls k)
     (cond
       [(null? ls) (k '())]
+      [(pair? (car ls))
+       (remv-first-9*-cps (car ls)
+                          (λ (v)
+                            (cond
+                              [(equal? (car ls) v)
+                               (remv-first-9*-cps (cdr ls)
+                                                  (λ (w)
+                                                    (k (cons (car ls) w))))]
+  
+                              [else (k (cons v (cdr ls)))])))]
       
-      
-      
-      
-      [else (cons (k (car ls)) (remv-first-9*-cps (cdr ls) (λ (v)
-                                                             (k v))))]
+      [(eqv? (car ls) '9) (k (cdr ls))]
+      [else (remv-first-9*-cps (cdr ls) (λ (w)
+                                          (k (cons (car ls) w))))]
       )))
 
-(remv-first-9*-cps '((1 2 (3) 9)) (empty-k))
-(remv-first-9*-cps '(9 (9 (9 (9)))) (empty-k))
-(remv-first-9*-cps '(((((9) 9) 9) 9) 9) (empty-k))
+;(remv-first-9*-cps '((1 2 (3) 9)) (empty-k))
+;(remv-first-9*-cps '(9 (9 (9 (9)))) (empty-k))
+;(remv-first-9*-cps '(((((9) 9) 9) 9) 9) (empty-k))
+
 
 ;Problem 6
 (define cons-cell-count-cps
   (lambda (ls k)
     (cond
       [(pair? ls)
-       (add1 (+ (cons-cell-count-cps (car ls) (λ (v)
-                                               (k v))) (cons-cell-count-cps (cdr ls) (λ (v)
-                                                                                      (k v)))))]
+       (cons-cell-count-cps (car ls) (λ (v)
+                                       (cons-cell-count-cps (cdr ls) (λ (w)
+                                                                       (k (add1 (+ v w)))))))]
       [else (k 0)]
       )))
 
@@ -95,8 +104,12 @@
 (define find-cps
   (lambda (u s k)
     (let ((pr (assv u s)))
-      (if pr (find-cps (cdr pr) s (λ (v)
-                                (k v))) (k u)))))
+      (if pr
+          ;then
+          (find-cps (cdr pr) s (λ (v)
+                                    (k v)))
+          ;else
+          (k u)))))
 
 ;(find-cps 5 '((5 . a) (6 . b) (7 . c)) (empty-k))
 ;(find-cps 7 '((5 . a) (6 . 5) (7 . 6)) (empty-k))
@@ -109,11 +122,11 @@
     (cond
       [(zero? m) (k (add1 n))]
       [(zero? n) (ack-cps (sub1 m) 1 (λ (v)
-                                   (k v)))]
+                                       (k v)))]
       [else (ack-cps (sub1 m)
-                 (ack-cps m (sub1 n) (λ (v)
-                                   (k v))) (λ (w)
-                                             (k w)))]
+                     (ack-cps m (sub1 n) (λ (v)
+                                           (k v))) (λ (w)
+                                                     (k w)))]
       )))
 
 
@@ -125,14 +138,14 @@
 ;Problem 9 (???)
 (define fib-cps
   (lambda (n k)
-    ((lambda (fib)
+    ((lambda (fib k^)
        (fib fib n))
      (lambda (fib n)
        (cond
-     [(zero? n) (k 0)]
-     [(zero? (sub1 n)) (k 1)]
-     [else (+ (fib fib (sub1 n)) (fib fib (sub1 (sub1 n))))]
-     )))))
+         [(zero? n) (k 0)]
+         [(zero? (sub1 n)) (k 1)]
+         [else (+ (fib fib (sub1 n)) (fib fib (sub1 (sub1 n))))]
+         )))))
 
 (define fib
   (λ (n)
@@ -140,11 +153,11 @@
       ((<= n 1) 1)
       (else (+ (fib (sub1 n)) (fib (sub1 (sub1 n))))))))
 
-;(fib-cps 2 (empty-k))
-;(fib 2)
+(fib-cps 2 (empty-k))
+(fib 2)
 
-;(fib-cps 5 (empty-k))
-;(fib 5)
+(fib-cps 5 (empty-k))
+(fib 5)
 
 
 ;Problem 10
@@ -154,24 +167,24 @@
        ((h h) seed '()))
      (lambda (h)
        (lambda (seed ans)
-     (if (p seed)
-         ;then
-         (k ans)
-         ;else
-         ((h h) (g seed) (cons (f seed) ans))))))))
+         (if (p seed)
+             ;then
+             (k ans)
+             ;else
+             ((h h) (g seed) (cons (f seed) ans))))))))
 
 
 (define null?-cps
-    (lambda (ls k)
-      (k (null? ls))))
+  (lambda (ls k)
+    (k (null? ls))))
 
 (define car-cps
-    (lambda (pr k)
-      (k (car pr))))
+  (lambda (pr k)
+    (k (car pr))))
 
 (define cdr-cps
-    (lambda (pr k)
-      (k (cdr pr))))
+  (lambda (pr k)
+    (k (cdr pr))))
 
 
 ;(unfold-cps null? car cdr '(a b c d e) (empty-k))
@@ -193,7 +206,7 @@
        (if (pair? v)
            ;then
            (let ((s (unify-cps (find-cps (car u) s (λ (v)
-                                                 (k v))) (find-cps (car v) s) s)))
+                                                     (k v))) (find-cps (car v) s) s)))
              (if s (unify-cps (find-cps (cdr u) s) (find-cps (cdr v) s) s) #f))
            ;else
            #f))
