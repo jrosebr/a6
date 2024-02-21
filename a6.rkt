@@ -23,11 +23,11 @@
 ;Problem 2 (???)
 (define star-cps
   (λ (m k)
-    (λ (n)
-      (k (* m n)))))
+    (λ (n k^)
+      (k (k^ (* m n))))))
 
-;((star-cps 2 (empty-k)) 3)
-;((star-cps ((star-cps 2 (empty-k)) 3) (empty-k)) 5)
+;((star-cps 2 (empty-k)) 3 (empty-k))
+;((star-cps ((star-cps 2 (empty-k)) 3 (empty-k)) (empty-k)) 5 (empty-k))
 
 
 ;Problem 3
@@ -36,8 +36,8 @@
     (cond
       [(null? ls) (k 1)]
       [(zero? (car ls)) (k 0)]
-      [else (* (k (car ls)) (times-cps (cdr ls) (λ (v)
-                                                  (k v))))]
+      [else (times-cps (cdr ls) (λ (v)
+                                  (k (* v (car ls)))))]
       )))
 
 ;(times-cps '(1 2 3 4 5) (empty-k))
@@ -50,39 +50,30 @@
     (cond
       [(null? ls) (k 1)]
       [(zero? (car ls)) 0]
-      [else (* (k (car ls)) (times-cps (cdr ls) (λ (v)
-                                                  (k v))))]
+      [else (times-cps (cdr ls) (λ (v)
+                                  (k (* v (car ls)))))]
       )))
 
 ;(times-cps-shortcut '(1 2 3 4 5) (empty-k))
 ;(times-cps-shortcut '(1 2 3 0 3) (empty-k))
 
-(require racket/trace)
-;Problem 5 (???)
+
+;Problem 5 (???) X
 (define remv-first-9*-cps
   (lambda (ls k)
     (cond
       [(null? ls) (k '())]
       
-      [(pair? (car ls))
-       (cond
-         [(equal? (car ls) (remv-first-9*-cps (car ls) (λ (v) v)))
-          (cons (k (car ls)) (remv-first-9*-cps (cdr ls) (λ (v)
-                                                           (k v))))]
-         [else (cons (k (cdr ls)) (remv-first-9*-cps (car ls) (λ (v)
-                                                   (k v))))])]
       
-      [(eqv? (car ls) '9) (cdr ls)]
+      
+      
       [else (cons (k (car ls)) (remv-first-9*-cps (cdr ls) (λ (v)
                                                              (k v))))]
       )))
 
-;(trace remv-first-9*-cps)
-
-;(remv-first-9*-cps '((1 2 (3) 9)) (empty-k))
-;(remv-first-9*-cps '(9 (9 (9 (9)))) (empty-k))
-;(remv-first-9*-cps '(((((9) 9) 9) 9) 9) (empty-k))
-
+(remv-first-9*-cps '((1 2 (3) 9)) (empty-k))
+(remv-first-9*-cps '(9 (9 (9 (9)))) (empty-k))
+(remv-first-9*-cps '(((((9) 9) 9) 9) 9) (empty-k))
 
 ;Problem 6
 (define cons-cell-count-cps
@@ -149,13 +140,11 @@
       ((<= n 1) 1)
       (else (+ (fib (sub1 n)) (fib (sub1 (sub1 n))))))))
 
-#|
-(fib-cps 2 (empty-k))
-(fib 2)
+;(fib-cps 2 (empty-k))
+;(fib 2)
 
-(fib-cps 5 (empty-k))
-(fib 5)
-|#
+;(fib-cps 5 (empty-k))
+;(fib 5)
 
 
 ;Problem 10
