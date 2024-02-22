@@ -20,7 +20,7 @@
 ;(binary-to-decimal-cps '(1 1 0 1) (empty-k))
 
 
-;Problem 2 (???)
+;Problem 2
 (define star-cps
   (λ (m k)
     (λ (n k^)
@@ -44,7 +44,7 @@
 ;(times-cps '(1 2 3 0 3) (empty-k))
 
 
-;Problem 4 (???)
+;Problem 4
 (define times-cps-shortcut
   (λ (ls k)
     (cond
@@ -107,7 +107,7 @@
       (if pr
           ;then
           (find-cps (cdr pr) s (λ (v)
-                                    (k v)))
+                                 (k v)))
           ;else
           (k u)))))
 
@@ -116,17 +116,17 @@
 ;(find-cps 5 '((5 . 6) (9 . 6) (2 . 9)) (empty-k))
 
 
-;Problem 8 (???)
+;Problem 8 
 (define ack-cps
   (lambda (m n k)
     (cond
       [(zero? m) (k (add1 n))]
       [(zero? n) (ack-cps (sub1 m) 1 (λ (v)
                                        (k v)))]
-      [else (ack-cps (sub1 m)
-                     (ack-cps m (sub1 n) (λ (v)
-                                           (k v))) (λ (w)
-                                                     (k w)))]
+      [else (ack-cps m (sub1 n) (λ (v)
+                                  (ack-cps (sub1 m)
+                                           v (λ (w)
+                                               (k w)))))]
       )))
 
 
@@ -135,38 +135,51 @@
 ;(ack-cps 1 1 (empty-k)) ;3
 
 
-;Problem 9 (???)
+;Problem 9
 (define fib-cps
   (lambda (n k)
-    ((lambda (fib k^)
-       (fib fib n)))))
+    ((lambda (fib^ k)
+       (fib^ fib^ n k))
+     (lambda (fib^^ n k)
+       (cond
+         [(zero? n) (k 0)]
+         [(zero? (sub1 n)) (k 1)]
+         [else (fib^^ fib^^ (sub1 n) (λ (v)
+                                       (fib^^ fib^^ (sub1 (sub1 n)) (λ (w)
+                                                                      (k (+ v w))))))]))
+     k)))
+
 
 (define fib
-  (λ (n)
-    (cond
-      ((<= n 1) 1)
-      (else (+ (fib (sub1 n)) (fib (sub1 (sub1 n))))))))
+  (lambda (n)
+    ((lambda (fib^)
+       (fib^ fib^ n))
+     (lambda (fib^^ n)
+       (cond
+         [(zero? n) 0]
+         [(zero? (sub1 n)) 1]
+         [else (+ (fib^^ fib^^ (sub1 n)) (fib^^ fib^^ (sub1 (sub1 n))))])))))
 
-(fib-cps 2 (empty-k))
-(fib 2)
 
-(fib-cps 5 (empty-k))
-(fib 5)
+;(fib-cps 2 (empty-k))
+;(fib 2)
+
+;(fib-cps 5 (empty-k))
+;(fib 5)
 
 
 ;Problem 10 (???)
+
 (define unfold-cps
   (lambda (p f g seed k)
-    ((lambda (h)
-       ((h h) seed '()))
-     (lambda (h)
-       (lambda (seed ans)
-         (if (p seed)
-             ;then
-             (k ans)
-             ;else
-             ((h h) (g seed) (cons (f seed) ans))))))))
-
+    ((lambda (h k)
+       (h h k) seed '()))
+    (lambda (h k)
+      (lambda (seed ans k)
+        (if (p seed)
+            (k ans)
+            (k (h h k) (g seed) (f seed) ans))))))
+    
 
 (define null?-cps
   (lambda (ls k)
@@ -181,8 +194,8 @@
     (k (cdr pr))))
 
 
-;(unfold-cps null? car cdr '(a b c d e) (empty-k))
-;(unfold-cps null?-cps car-cps cdr-cps '(a b c d e) (empty-k))
+(unfold-cps null? car cdr '(a b c d e) (empty-k))
+(unfold-cps null?-cps car-cps cdr-cps '(a b c d e) (empty-k))
 
 ;Problem 11 (???)
 (define empty-s
@@ -207,10 +220,19 @@
       (else (k #f)))))
 
 
-;Problem 12
+;Problem 12 (???)
+(define M-cps
+  (λ (f k)
+    (λ (ls k^)
+      (M-cps f (λ (v)
+                 (cond
+                   [(null? ls) (k (k^ '()))]
+                   [else (cons (f (car ls)) (v (cdr ls)))]))))))
 
 
 ;Problem 13
+#;(define use-of-M-cps
+    ((M (lambda (n) (add1 n))) '(1 2 3 4 5)))
 
 
 
