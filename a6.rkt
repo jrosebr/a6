@@ -139,13 +139,7 @@
 (define fib-cps
   (lambda (n k)
     ((lambda (fib k^)
-       (fib fib n))
-     (lambda (fib n)
-       (cond
-         [(zero? n) (k 0)]
-         [(zero? (sub1 n)) (k 1)]
-         [else (+ (fib fib (sub1 n)) (fib fib (sub1 (sub1 n))))]
-         )))))
+       (fib fib n)))))
 
 (define fib
   (λ (n)
@@ -160,7 +154,7 @@
 (fib 5)
 
 
-;Problem 10
+;Problem 10 (???)
 (define unfold-cps
   (lambda (p f g seed k)
     ((lambda (h)
@@ -190,7 +184,7 @@
 ;(unfold-cps null? car cdr '(a b c d e) (empty-k))
 ;(unfold-cps null?-cps car-cps cdr-cps '(a b c d e) (empty-k))
 
-;Problem 11
+;Problem 11 (???)
 (define empty-s
   (lambda ()
     '()))
