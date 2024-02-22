@@ -213,39 +213,39 @@
  
 (define unify-cps
   (lambda (u v s k)
+    
     (cond
-      ((eqv? u v) (k s))
-      ((number? u) (k (cons (cons u v) s)))
-      ((number? v) (unify-cps v u s (λ (v)
-                                      (k v))))
-      ((pair? u)
+      [(eqv? u v) (k s)]
+      [(number? u) (k (cons (cons u v) s))]
+      [(number? v) (unify-cps v u s k)]
+      [(pair? u)
        (if (pair? v)
-           ;then
-           (let ((s (unify-cps (find-cps (car u) s (λ (v)
-                                                     (k v))) (find-cps (car v) s) s)))
-             (if s (unify-cps (find-cps (cdr u) s) (find-cps (cdr v) s) s) #f))
-           ;else
-           #f))
-      (else (k #f)))))
+           ((find-cps (car u) s (λ (f)
+                                  (find-cps (car v) s (λ (g)
+                                                        (unify-cps f g s (λ (y)
+                                                                      (if y
+                                                                          )))))))
+                                                                          
+                                                     
+
+           ;Problem 12 (???)
+           (define M-cps
+             (λ (f k)
+               (k (λ (ls k^)
+                    (M-cps f (λ (v)
+                               (f (lambda (f^)
+                                    (v (lambda (v^)
+                                         (cond
+                                           [(null? ls) (k^ '())]
+                                           [else (cons (f^ (car ls)) (v^ (cdr ls)))])))))))))))
 
 
-;Problem 12 (???)
-(define M-cps
-  (λ (f k)
-    (k (λ (ls k^)
-         (M-cps f (λ (v)
-                    (f (lambda (f^)
-                         (v (lambda (v^)
-                              (cond
-                                [(null? ls) (k^ '())]
-                                [else (cons (f^ (car ls)) (v^ (cdr ls)))])))))))))))
-
-
-;Problem 13
-#;(define use-of-M-cps
-    ((M (lambda (n) (add1 n))) '(1 2 3 4 5)))
-
-
+           ;Problem 13
+           #;(define use-of-M-cps
+               ((M (lambda (n) (add1 n))) '(1 2 3 4 5)))
 
 
 
+
+
+           
