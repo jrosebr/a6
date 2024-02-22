@@ -168,17 +168,26 @@
 ;(fib 5)
 
 
-;Problem 10 (???)
+;Problem 10
 
 (define unfold-cps
   (lambda (p f g seed k)
-    ((lambda (h k)
-       (h h k) seed '()))
-    (lambda (h k)
-      (lambda (seed ans k)
-        (if (p seed)
-            (k ans)
-            (k (h h k) (g seed) (f seed) ans))))))
+    ((lambda (h^ k)
+       (h^ h^ (lambda (v)
+                (v seed '() k))))
+     (lambda (h^^ k)
+       (k (lambda (seed ans k)
+            (p seed (lambda (m)
+                      (if m
+                          (k ans)
+                          (h^^ h^^
+                               (lambda (w)
+                                 (g seed
+                                    (lambda (n)
+                                      (f seed
+                                         (lambda (l)
+                                           (w n (cons l ans) k)))))))))))))
+     k)))
     
 
 (define null?-cps
@@ -194,8 +203,8 @@
     (k (cdr pr))))
 
 
-(unfold-cps null? car cdr '(a b c d e) (empty-k))
-(unfold-cps null?-cps car-cps cdr-cps '(a b c d e) (empty-k))
+;(unfold-cps null? car cdr '(a b c d e) (empty-k)) ;(e d c b a)
+;(unfold-cps null?-cps car-cps cdr-cps '(a b c d e) (empty-k)) ;(e d c b a)
 
 ;Problem 11 (???)
 (define empty-s
@@ -223,11 +232,13 @@
 ;Problem 12 (???)
 (define M-cps
   (λ (f k)
-    (λ (ls k^)
-      (M-cps f (λ (v)
-                 (cond
-                   [(null? ls) (k (k^ '()))]
-                   [else (cons (f (car ls)) (v (cdr ls)))]))))))
+    (k (λ (ls k^)
+         (M-cps f (λ (v)
+                    (f (lambda (f^)
+                         (v (lambda (v^)
+                              (cond
+                                [(null? ls) (k^ '())]
+                                [else (cons (f^ (car ls)) (v^ (cdr ls)))])))))))))))
 
 
 ;Problem 13
