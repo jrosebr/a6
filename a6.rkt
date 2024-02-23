@@ -22,12 +22,14 @@
 
 ;Problem 2
 (define star-cps
-  (λ (m k)
-    (λ (n k^)
-      (k (k^ (* m n))))))
+  (lambda (m k)
+    (k (lambda (n k)
+         (k (* m n))))))
 
-;((star-cps 2 (empty-k)) 3 (empty-k))
-;((star-cps ((star-cps 2 (empty-k)) 3 (empty-k)) (empty-k)) 5 (empty-k))
+;(star-cps 2 (lambda (s) (s 3 (empty-k)))) ;(???)
+;(star-cps 5 (lambda (s-5) (star-cps 2 (lambda (s-2) (s-2 3 (lambda (v) (s-5 v (empty-k))))))))
+;((star-cps 2 (empty-k)) 3 (empty-k)) ;WORKS
+;((star-cps ((star-cps 2 (empty-k)) 3 (empty-k)) (empty-k)) 5 (empty-k)) ;WORKS
 
 
 ;Problem 3
@@ -206,46 +208,56 @@
 ;(unfold-cps null? car cdr '(a b c d e) (empty-k)) ;(e d c b a)
 ;(unfold-cps null?-cps car-cps cdr-cps '(a b c d e) (empty-k)) ;(e d c b a)
 
-;Problem 11 (???)
+;Problem 11
 (define empty-s
   (lambda ()
     '()))
  
 (define unify-cps
   (lambda (u v s k)
-    
     (cond
       [(eqv? u v) (k s)]
       [(number? u) (k (cons (cons u v) s))]
       [(number? v) (unify-cps v u s k)]
       [(pair? u)
        (if (pair? v)
-           ((find-cps (car u) s (λ (f)
-                                  (find-cps (car v) s (λ (g)
-                                                        (unify-cps f g s (λ (y)
-                                                                      (if y
-                                                                          )))))))
-                                                                          
+           (find-cps (car u) s (λ (f)
+                                 (find-cps (car v) s (λ (g)
+                                                       (unify-cps f g s (λ (y)
+                                                                          (if y
+                                                                              (find-cps (cdr u) y (λ (q)
+                                                                                                    (find-cps (cdr v) y (λ (p)
+                                                                                                                          (unify-cps q p y k)))))
+                                                                              (k #f))))))))
+           (k #f))]
+      (else (k #f)))))
+
+
+;(unify-cps 'x 5 (empty-s) (empty-k)) ;WORKS
+;(unify-cps 'x 5 (unify-cps 'y 6 (empty-s) (empty-k)) (empty-k)) ;WORKS
+;(unify-cps '(x y) '(5 6) (empty-s) (empty-k)) ;DOES NOT WORK
+;(unify-cps 'x 5 (unify-cps 'x 6 (empty-s) (empty-k)) (empty-k)) ;WORKS
+;(unify-cps '(x x) '(5 6) (empty-s) (empty-k)) ;DOES NOT WORK
+;(unify-cps '(1 2 3) '(x 1 2) (empty-s) (empty-k)) ;DOES NOT WORK
+;(unify-cps 'x 'y (empty-s) (empty-k)) ;WORKS
                                                      
 
-           ;Problem 12 (???)
-           (define M-cps
-             (λ (f k)
-               (k (λ (ls k^)
-                    (M-cps f (λ (v)
-                               (f (lambda (f^)
-                                    (v (lambda (v^)
-                                         (cond
-                                           [(null? ls) (k^ '())]
-                                           [else (cons (f^ (car ls)) (v^ (cdr ls)))])))))))))))
+;Problem 12
+;This problem took me 3 hours. I'm so tired.
+(define M-cps
+  (λ (f k)
+    (k (λ (ls k^)
+         (cond
+           [(null? ls) (k^ '())]
+           [else  (M-cps f (λ (w)
+                             (f (car ls) (λ (c)
+                             (cons c (w (cdr ls) k^))))))] 
+           )))))
+
+(M-cps (lambda (n k) (k (add1 n))) (lambda (p) (p (quote (1 2 3 4 5)) (empty-k))))
 
 
-           ;Problem 13
-           #;(define use-of-M-cps
-               ((M (lambda (n) (add1 n))) '(1 2 3 4 5)))
+;Problem 13 (???)
+#;(define use-of-M-cps
+    ((M-cps (lambda (n) (add1 n))) '(1 2 3 4 5) (empty-k)))
 
-
-
-
-
-           
